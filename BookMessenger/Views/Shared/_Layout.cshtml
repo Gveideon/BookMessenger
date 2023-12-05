@@ -1,0 +1,37 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>BookMessenger | @ViewBag.Title</title>
+     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <h2>@ViewBag.Title</h2>
+    <div>
+        <a href="/Home/Index">Home</a> | 
+        @if (User.FindFirst(ClaimTypes.Name) is null)
+        {
+           @: <a href="/Home/Login">Sign in</a>|
+           @: <a href = "/Home/Reg" > Registration </a>|
+        }
+        @if(User.FindFirst(ClaimTypes.Name) is not null)
+        {
+             <a href="/Home/Logout">Sign out</a>
+        }
+    </div>
+    <main>
+        @RenderBody()
+    </main>
+    <footer>
+        @if (IsSectionDefined("Footer"))
+        {
+            @RenderSection("Footer")
+        }
+        else
+        {
+          <span>Copyright© BookMessenger, @DateTime.Now.Year. All rights reserved</span>
+        }
+    </footer>
+</body>
+
+</html>

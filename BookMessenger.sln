@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33122.133
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookMessenger", "BookMessenger\BookMessenger.csproj", "{05A9AEC8-8485-4AFD-87F8-D7490E921F4A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{05A9AEC8-8485-4AFD-87F8-D7490E921F4A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{05A9AEC8-8485-4AFD-87F8-D7490E921F4A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{05A9AEC8-8485-4AFD-87F8-D7490E921F4A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{05A9AEC8-8485-4AFD-87F8-D7490E921F4A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8CB93FBC-45D0-4241-8655-0BC39EDC356E}
+	EndGlobalSection
+EndGlobal

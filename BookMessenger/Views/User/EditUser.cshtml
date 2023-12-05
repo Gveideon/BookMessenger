@@ -1,0 +1,40 @@
+﻿@model BookMessenger.Models.User
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+<div>
+    <form asp-action="EditUser" asp-controller="User">
+    <p>
+        <label asp-for="Login">Логин</label><br />
+        <input type="text" asp-for="Login" />
+    </p>
+    <p>
+        <label asp-for="Password">Пароль</label><br />
+        <input type="text" asp-for="Password" />
+    </p>
+    <p>
+        <label asp-for="FirstName">Имя</label><br />
+        <input type="text" asp-for="FirstName" />
+    </p>
+    <p>
+        <label asp-for="LastName">Фамилия</label><br />
+        <input type="text" asp-for="LastName" />
+    </p>
+    <p>
+        <label asp-for="Email">Почта</label><br />
+        <input type="text" asp-for="Email" />
+    </p>
+        @if (User.FindFirst(ClaimTypes.Role)?.Value == TypeRole.Admin.ToString())
+        {
+            <p>
+                <label asp-for="Role">Роль</label><br />
+                <select asp-for="Role" asp-items="@new SelectList(Enum.GetNames(typeof(TypeRole)))"></select>
+            </p>
+        }
+    <p>
+        <input type="submit" value="Изменить" />
+    </p>
+    </form>
+</div>

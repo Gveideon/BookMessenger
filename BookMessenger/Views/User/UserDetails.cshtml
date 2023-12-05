@@ -1,0 +1,13 @@
+﻿@model BookMessenger.Models.User
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+<div>
+<p> Имя: @Model.FirstName</p><br/>
+<p> Фамилия: @Model.LastName</p><br/>
+<p> Логин: @Model.Login</p><br/>
+<p> Пароль: @Model.Password</p><br/>
+<p> Роль: @Model.Role.ToString()</p><br/>
+</div>
