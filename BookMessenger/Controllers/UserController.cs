@@ -12,6 +12,10 @@ namespace BookMessenger.Controllers
         }
         public IActionResult Index()
         {
+            return View();
+        }
+        public IActionResult AllUsers()
+        {
             return View(db.Users.ToList());
         }
         public IActionResult EditUser(int? id)

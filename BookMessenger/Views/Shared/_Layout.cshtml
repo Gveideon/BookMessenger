@@ -9,6 +9,18 @@
     <h2>@ViewBag.Title</h2>
     <div>
         <a href="/Home/Index">Home</a> | 
+        @if (User.FindFirst(ClaimTypes.Role)?.Value == TypeRole.Admin.ToString())
+        {
+            <a href="/Admin/Index">Личный кабинет</a>
+        }
+        @if (User.FindFirst(ClaimTypes.Role)?.Value == TypeRole.Operator.ToString())
+        {
+            <a href="/Operator/Index">Личный кабинет</a>
+        }
+        @if (User.FindFirst(ClaimTypes.Role)?.Value == TypeRole.User.ToString())
+        {
+            <a href="/User/Index">Личный кабинет</a>
+        }
         @if (User.FindFirst(ClaimTypes.Name) is null)
         {
            @: <a href="/Home/Login">Sign in</a>|

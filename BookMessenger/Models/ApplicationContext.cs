@@ -11,7 +11,6 @@ namespace BookMessenger.Models
         public DbSet<Genre> Genres { get; set; }
         public DbSet<UserBook> Marks { get; set; }  
         public DbSet<Message> Messages { get; set; }
-        public DbSet<Role> Roles { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<UserProfile> UserProfiles { get; set; }
         public ApplicationContext(DbContextOptions<ApplicationContext> options)

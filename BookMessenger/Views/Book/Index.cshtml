@@ -1,0 +1,38 @@
+﻿@model (List<Book>,Book)
+
+<div class="left_box">
+    <h2>Список книг</h2>
+    <table class="table">
+        <tr><th>Название</th><th></th><th></th><th></th></tr>
+        @foreach (var item in Model.Item1)
+        {
+            <tr>
+                <td>@item.Title</td>
+                <td>
+                    <a asp-action="ShowBookDescription" asp-controller="Book" asp-route-id="@item.Id">Детали</a>
+                </td>
+                <td>
+                    <a asp-action="EditBook" asp-controller="Book" asp-route-id="@item.Id">Изменить</a>
+                </td>
+                <td>
+                    <form asp-controller="Book" asp-action="DeleteBook" method="post" asp-route-id="@item.Id">
+                        <input type="submit" value="Удалить" />
+                    </form>
+                </td>
+            </tr>
+
+        }
+    </table>
+    <a asp-action="CreateBook" asp-controller="Book">Добавить книгу</a>
+</div>
+<div class="right_box">
+    <p>Название: @Model.Item2?.Title</p><br/>
+    <p>Описание: @Model.Item2?.Description</p><br />
+    Авторы: 
+    @foreach (var author in Model.Item2?.AuthorBooks?.OrderBy( x => x.NumberOfAuthor))
+    {
+        <p>@author.Author?.Name</p><br/>
+    }
+    Жанры:
+    @String.Join(", ",Model.Item2?.Genres?.Select(x => x.Name));
+</div>
