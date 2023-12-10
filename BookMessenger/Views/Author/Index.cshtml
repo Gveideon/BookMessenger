@@ -1,1 +1,52 @@
-﻿@model List<Author>
+﻿@model (List<Author>,Author)
+
+<div class="left_box">
+    <h2>Список авторов</h2>
+    <table class="table">
+        <tr><th>Имя</th><th></th><th></th><th></th></tr>
+        @foreach (var item in Model.Item1)
+        {
+            <tr>
+                <td>@item.Name</td>
+                <td>
+                    <a asp-action="ShowAuthorDescription" asp-controller="Author" asp-route-id="@item.Id">Детали</a>
+                </td>
+                <td>
+                    <a asp-action="EditAuthor" asp-controller="Author" asp-route-id="@item.Id">Изменить</a>
+                </td>
+                <td>
+                    <form asp-controller="Author" asp-action="DeleteAuthor" method="post" asp-route-id="@item.Id">
+                        <input type="submit" value="Удалить" />
+                    </form>
+                </td>
+            </tr>
+
+        }
+    </table>
+    <a asp-action="CreateAuthor" asp-controller="Author">Добавить автора</a>
+</div>
+<div class="right_box">
+    <p>Имя: @Model.Item2?.Name</p><br/>
+    <p>Описание: @Model.Item2?.Description</p><br />
+    @if (Model.Item2 is not null) {
+    @: Книги:
+    <table class="table">
+        <tr><th>Название</th><th></th></tr>
+        @foreach(var book in Model.Item2?.AuthorBooks)
+          {
+            <tr>
+               <td> @book.Book?.Title</td>
+               <td> <form asp-controller="Author" 
+                asp-action="DeleteBookFromAuthor" 
+                method="post" 
+                asp-route-bookId="@book.Book?.Id"
+                asp-route-authorId="@Model.Item2?.Id">
+                    <input type="submit" value="Удалить" />
+                        </form>
+              </td>
+            </tr>
+        }
+        </table>
+}
+    <a asp-action="AddBookToAuthor" asp-controller="Author" asp-route-authorId="@Model.Item2?.Id">Добавить книгу</a>
+</div>

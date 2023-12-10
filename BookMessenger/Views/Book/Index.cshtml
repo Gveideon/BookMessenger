@@ -28,11 +28,30 @@
 <div class="right_box">
     <p>Название: @Model.Item2?.Title</p><br/>
     <p>Описание: @Model.Item2?.Description</p><br />
-    Авторы: 
-    @foreach (var author in Model.Item2?.AuthorBooks?.OrderBy( x => x.NumberOfAuthor))
-    {
-        <p>@author.Author?.Name</p><br/>
-    }
-    Жанры:
-    @String.Join(", ",Model.Item2?.Genres?.Select(x => x.Name));
+    @if (Model.Item2 is not null) {
+    @: Авторы:<br/>
+    <table>
+            <tr><th>Имя</th><th>Номер</th><th></th><th></th></tr>
+        @foreach(var author in Model.Item2?.AuthorBooks.OrderBy(a => a.NumberOfAuthor))
+          {
+            <tr>
+               <td> @author.Author?.Name</td>
+               <td> @author.NumberOfAuthor</td>
+               <td> <form asp-controller="Book"
+                    asp-action="DeleteAuthorFromBook"
+                    method="post"
+                    asp-route-bookId="@Model.Item2?.Id"
+                    asp-route-authorId="@author.Author?.Id">
+                        <input type="submit" value="Удалить" />
+                    </form>
+              </td>
+            </tr>
+        }
+        </table>
+
+    @:Жанры:
+    String.Join(", ",Model.Item2?.Genres?.Select(x => x.Name));
+}
+
+    <a asp-action="AddAuthorToBook" asp-controller="Book" asp-route-bookId="@Model.Item2?.Id">Добавить автора</a>
 </div>

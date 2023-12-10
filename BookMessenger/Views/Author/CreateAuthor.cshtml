@@ -1,0 +1,16 @@
+﻿@model Author
+<div>
+    <form asp-action="CreateAuthor" asp-controller="Author">
+        <p>
+            <label asp-for="Name">Имя</label><br />
+            <input type="text" asp-for="Name" />
+        </p>
+        <p>
+            <label asp-for="Description">Описание</label><br />
+            <textarea asp-for="Description"></textarea>
+        </p>
+        <p>
+            <input type="submit" value="Добавить" />
+        </p>
+    </form>
+</div>
