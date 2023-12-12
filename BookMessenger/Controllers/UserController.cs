@@ -1,5 +1,6 @@
 ﻿using BookMessenger.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace BookMessenger.Controllers
 {
@@ -32,6 +33,10 @@ namespace BookMessenger.Controllers
         {
             db.Users.Update(user);
             db.SaveChanges();
+            if (User.FindFirst(ClaimTypes.Role)?.Value == TypeRole.Admin.ToString())
+            {
+                return RedirectToAction("Index", "Admin");
+            }
             return RedirectToAction("Index");
         }
         public IActionResult CreateUser()
@@ -41,7 +46,13 @@ namespace BookMessenger.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateUser(User user)
         {
+            var profile = new UserProfile
+            {
+                User = user,
+            };
+            user.UserProfile = profile;
             db.Users.Add(user);
+            db.UserProfiles.Add(profile);
             db.SaveChanges();
             return RedirectToAction("Index");
         }

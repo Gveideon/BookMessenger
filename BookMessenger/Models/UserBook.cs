@@ -7,7 +7,7 @@
         public Book? Book { get; set; }
         public int UserProfileId { get; set; }
         public UserProfile? User { get; set; }
-        public int? MarkValue{ get; set; }
+        public int? MarkValue { get; set; } = -1;
         public bool? HasInLibrary { get; set; } = false;
     }
 }

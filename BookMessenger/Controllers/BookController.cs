@@ -197,5 +197,298 @@ namespace BookMessenger.Controllers
             }
             return BadRequest();
         }
+        public IActionResult Catalog(int? bookId,int? userId)
+        {
+            Book? selectedBook = null;
+            UserProfile? user = null;
+            db.Books.Load();
+            db.Marks.Load();
+            db.UserProfiles.Load();
+            db.Genres.Load();
+            db.AuthorBooks.Load();
+            db.Authors.Load();
+            if(bookId is not null) 
+                selectedBook = db.Books.
+                    Include(b => b.Genres).
+                    Include(b => b.AuthorBooks).
+                    Include(b => b.UserProfiles)
+                    .FirstOrDefault(b => b.Id == bookId);
+            if(userId is not null)
+                user = db.UserProfiles.
+                    Include(u => u.UserBooks).
+                    Include(u => u.Books).
+                    FirstOrDefault(b => b.UserId == userId);
+            var books = db.Books.
+                    Include(b => b.Genres).
+                    Include(b => b.AuthorBooks).
+                    Include(b => b.UserProfiles).ToList();
+            if (HttpContext.Request.Cookies.ContainsKey("stateCatalog"))
+            {
+                var state = Request.Cookies["stateCatalog"];
+                if(state == "MyLibrary")
+                {
+                    books = user.UserBooks
+                        .Where(ub => ub.HasInLibrary == true)
+                        .Select(b => b.Book).ToList();
+                        
+                }
+                if (state == "Favorites")
+                {
+                    books = user.UserBooks
+                        .Where(ub => ub.MarkValue == 1)
+                        .Select(b => b.Book).ToList();
+                }
+            }
+            else
+            {
+                HttpContext.Response.Cookies.Append("stateCatalog", "base");
+            }
+                if (selectedBook is null)
+                selectedBook = books.FirstOrDefault();
+            return View((books, selectedBook, user));
+        }
+        public IActionResult ShowBookCatalogDescription(int? bookId, int? userId)
+        {
+            return RedirectToAction("Catalog","Book", new { bookId = bookId, userId = userId });
+        }
+        public IActionResult AddToLibrary(int? bookId, int? userId, int? ubId)
+        {
+            db.Books.Load();
+            db.Marks.Load();
+            db.UserProfiles.Load();
+            if (bookId is not null && userId  is not null)
+            {
+                var user = db.UserProfiles.
+                    Include(u => u.UserBooks).
+                    FirstOrDefault(b => b.UserId == userId);
+                var book = db.Books.
+                    Include(b => b.UserProfiles)
+                    .FirstOrDefault(b => b.Id == bookId);
+                UserBook? ub = null;
+                if (book is not null && user is not null) {
+                    if (ubId is not null)
+                        ub = db.Marks.FirstOrDefault(b => b.Id == ubId);
+                    if (ub is null)
+                    {
+                        ub = new UserBook
+                        {
+                            BookId = book.Id,
+                            UserProfileId = user.Id,
+                            Book = book,
+                            User = user,
+                            HasInLibrary = true
+                        };
+                        user.UserBooks.Add(ub);
+                        db.SaveChanges();
+                        return RedirectToAction("Catalog", "Book", new { bookId = bookId, userId = userId });
+                    }
+                    ub.HasInLibrary = true;
+                    db.Marks.Update(ub);
+                    db.SaveChanges();
+                }
+            }
+            return RedirectToAction("Catalog", "Book", new { bookId = bookId, userId = userId });
+        }
+        public IActionResult RemoveFromLibrary(int? bookId, int? userId, int? ubId)
+        {
+            db.Books.Load();
+            db.Marks.Load();
+            db.UserProfiles.Load();
+            if (bookId is not null && userId is not null)
+            {
+                var user = db.UserProfiles.
+                    Include(u => u.UserBooks).
+                    FirstOrDefault(b => b.UserId == userId);
+                var book = db.Books.
+                    Include(b => b.UserProfiles)
+                    .FirstOrDefault(b => b.Id == bookId);
+                UserBook? ub = null;
+                if (book is not null && user is not null)
+                {
+                    if (ubId is not null)
+                        ub = db.Marks.FirstOrDefault(b => b.Id == ubId);
+                    if (ub is null)
+                    {
+                        ub = new UserBook
+                        {
+                            BookId = book.Id,
+                            UserProfileId = user.Id,
+                            Book = book,
+                            User = user,
+                            HasInLibrary = false
+                        };
+                        user.UserBooks.Add(ub);
+                        db.SaveChanges();
+                        return RedirectToAction("Catalog", "Book", new { bookId = bookId, userId = userId });
+                    }
+                    ub.HasInLibrary = false;
+                    db.Marks.Update(ub);
+                    db.SaveChanges();
+                }
+            }
+            return RedirectToAction("Catalog", "Book", new { bookId = bookId, userId = userId });
+        }
+        public IActionResult LikeBook(int? bookId, int? userId, int? ubId)
+        {
+            db.Books.Load();
+            db.Marks.Load();
+            db.UserProfiles.Load();
+            if (bookId is not null && userId is not null)
+            {
+                var user = db.UserProfiles.
+                    Include(u => u.UserBooks).
+                    FirstOrDefault(b => b.UserId == userId);
+                var book = db.Books.
+                    Include(b => b.UserProfiles)
+                    .FirstOrDefault(b => b.Id == bookId);
+                UserBook? ub = null;
+                if (book is not null && user is not null)
+                {
+                    if (ubId is not null)
+                        ub = db.Marks.FirstOrDefault(b => b.Id == ubId);
+                    if (ub is null)
+                    {
+                        ub = new UserBook
+                        {
+                            BookId = book.Id,
+                            UserProfileId = user.Id,
+                            Book = book,
+                            User = user,
+                            HasInLibrary = false,
+                            MarkValue =1
+                        };
+                        user.UserBooks.Add(ub);
+                        db.SaveChanges();
+                        return RedirectToAction("Catalog", "Book", new { bookId = bookId, userId = userId });
+                    }
+                    ub.MarkValue =1;
+                    db.Marks.Update(ub);
+                    db.SaveChanges();
+                }
+            }
+            return RedirectToAction("Catalog", "Book", new { bookId = bookId, userId = userId });
+        }
+        public IActionResult DislikeBook(int? bookId, int? userId, int? ubId)
+        {
+            db.Books.Load();
+            db.Marks.Load();
+            db.UserProfiles.Load();
+            if (bookId is not null && userId is not null)
+            {
+                var user = db.UserProfiles.
+                    Include(u => u.UserBooks).
+                    FirstOrDefault(b => b.UserId == userId);
+                var book = db.Books.
+                    Include(b => b.UserProfiles)
+                    .FirstOrDefault(b => b.Id == bookId);
+                UserBook? ub = null;
+                if (book is not null && user is not null)
+                {
+                    if (ubId is not null)
+                        ub = db.Marks.FirstOrDefault(b => b.Id == ubId);
+                    if (ub is null)
+                    {
+                        ub = new UserBook
+                        {
+                            BookId = book.Id,
+                            UserProfileId = user.Id,
+                            Book = book,
+                            User = user,
+                            HasInLibrary = false,
+                            MarkValue = 0
+                        };
+                        user.UserBooks.Add(ub);
+                        db.SaveChanges();
+                        return RedirectToAction("Catalog", "Book", new { bookId = bookId, userId = userId });
+                    }
+                    ub.MarkValue = 0;
+                    db.Marks.Update(ub);
+                    db.SaveChanges();
+                }
+            }
+            return RedirectToAction("Catalog", "Book", new { bookId = bookId, userId = userId });
+        }
+        public IActionResult CancelMarkBook(int? bookId, int? userId, int? ubId)
+        {
+            db.Books.Load();
+            db.Marks.Load();
+            db.UserProfiles.Load();
+            if (bookId is not null && userId is not null)
+            {
+                var user = db.UserProfiles.
+                    Include(u => u.UserBooks).
+                    FirstOrDefault(b => b.UserId == userId);
+                var book = db.Books.
+                    Include(b => b.UserProfiles)
+                    .FirstOrDefault(b => b.Id == bookId);
+                UserBook? ub = null;
+                if (book is not null && user is not null)
+                {
+                    if (ubId is not null)
+                        ub = db.Marks.FirstOrDefault(b => b.Id == ubId);
+                    if (ub is null)
+                    {
+                        ub = new UserBook
+                        {
+                            BookId = book.Id,
+                            UserProfileId = user.Id,
+                            Book = book,
+                            User = user,
+                            HasInLibrary = false,
+                            MarkValue = -1
+                        };
+                        user.UserBooks.Add(ub);
+                        db.SaveChanges();
+                        return RedirectToAction("Catalog", "Book", new { bookId = bookId, userId = userId });
+                    }
+                    ub.MarkValue = -1;
+                    db.Marks.Update(ub);
+                    db.SaveChanges();
+                }
+            }
+            return RedirectToAction("Catalog", "Book", new { bookId = bookId, userId = userId });
+        }
+        public IActionResult UserLibrary(int? bookId, int? userId)
+        {
+            if (HttpContext.Request.Cookies.ContainsKey("stateCatalog"))
+            {
+                HttpContext.Response.Cookies.Delete("stateCatalog");
+                HttpContext.Response.Cookies.Append("stateCatalog", "MyLibrary");
+            }
+            else
+            {
+                HttpContext.Response.Cookies.Append("stateCatalog", "MyLibrary");
+            }
+            return RedirectToAction("Catalog", "Book", new { bookId = bookId, userId = userId });
+
+        }
+        public IActionResult UserFavorite(int? bookId, int? userId)
+        {
+            if (HttpContext.Request.Cookies.ContainsKey("stateCatalog"))
+            {
+                HttpContext.Response.Cookies.Delete("stateCatalog");
+                HttpContext.Response.Cookies.Append("stateCatalog", "Favorites");
+            }
+            else
+            {
+                HttpContext.Response.Cookies.Append("stateCatalog", "Favorites");
+            }
+            return RedirectToAction("Catalog", "Book", new { bookId = bookId, userId = userId });
+
+        }
+        public IActionResult CatalogShow(int? bookId, int? userId)
+        {
+            if (HttpContext.Request.Cookies.ContainsKey("stateCatalog"))
+            {
+                HttpContext.Response.Cookies.Delete("stateCatalog");
+                HttpContext.Response.Cookies.Append("stateCatalog", "base");
+            }
+            else
+            {
+                HttpContext.Response.Cookies.Append("stateCatalog", "base");
+            }
+            return RedirectToAction("Catalog", "Book", new { bookId = bookId, userId = userId });
+
+        }
     }
 }

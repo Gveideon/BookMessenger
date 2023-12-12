@@ -1,8 +1,42 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
-}
-<div>
-
+﻿
+<div  class="left_box">
+    <p>
+        <a asp-action="CatalogShow"
+            asp-controller="Book"
+            asp-route-userId="@User.FindFirst(ClaimTypes.Surname)?.Value">
+            Каталог
+        </a>
+    </p>
+    <p>
+        <a asp-action="UserLibrary"
+            asp-controller="Book"
+            asp-route-userId="@User.FindFirst(ClaimTypes.Surname)?.Value">
+            Моя библиотека
+        </a>
+    </p>
+    <p>
+        <a asp-action="UserFavorite"
+           asp-controller="Book"
+           asp-route-userId="@User.FindFirst(ClaimTypes.Surname)?.Value">
+            Понравившиеся
+         </a>
+    </p>
+    <p>
+        <a asp-action="ShowLikeTop" asp-controller="Book">Топ по лайкам</a>
+    </p>
+    <p>
+        <a asp-action="ShowAddingTop" asp-controller="Book">Топ по добавлениям</a>
+    </p>
+</div>
+<div class="right_box">
+    <h1 class="display-4">Ддоброго времени суток @User.FindFirst(ClaimTypes.Name)?.Value</h1>
+    <p>
+        <a asp-action="EditUser" asp-controller="User" asp-route-id="@User.FindFirst(ClaimTypes.Surname)?.Value">Редактировать профиль</a>
+    </p>
+    <p>
+        <a asp-action="UserFriends" asp-controller="User">Друзья</a>
+    </p>
+    <p>
+        <a asp-action="UserDiscusses" asp-controller="User">Переиски</a>
+    </p>
 </div>

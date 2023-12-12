@@ -1,0 +1,155 @@
+﻿@model (List<Book>,Book,UserProfile)
+
+<div class="left_box">
+    <h2>Список книг</h2>
+    <table class="table">
+        <tr><th>Название</th><th></th></tr>
+        @foreach (var item in Model.Item1)
+        {
+            <tr>
+                <td>@item.Title</td>
+                <td>
+                    <a asp-action="ShowBookCatalogDescription"
+                        asp-controller="Book"
+                        asp-route-bookId="@item.Id"
+                        asp-route-userId ="@Model.Item3.UserId">
+                        Детали
+                    </a>
+                </td>
+            </tr>
+
+        }
+    </table>
+</div>
+<div class="right_box">
+    <p>Название: @Model.Item2?.Title</p><br/>
+    <p>Описание: @Model.Item2?.Description</p><br />
+    @if (Model.Item2 is not null) 
+    {
+        @: <p>Авторы:</p>
+        <table>
+        <tr><th>Имя</th><th>Номер</th></tr>
+            @foreach(var author in Model.Item2?.AuthorBooks.OrderBy(a => a.NumberOfAuthor))
+              {
+                <tr>
+                   <td> @author.Author?.Name</td>
+                   <td> @author.NumberOfAuthor</td>
+                </tr>
+              }
+            </table>
+
+        <p>Жанры:</p>
+            <table>
+                <tr><th></th></tr>
+                @foreach (var genre in Model.Item2.Genres)
+                {
+                    <tr>
+                        <td> @genre.Name</td>
+                    </tr>
+                }
+        </table>
+        if (Model.Item3 is not null)
+        {
+            var ub = Model.
+                Item2.
+                UserBooks.
+                FirstOrDefault(b => b.UserProfileId == Model.Item3.Id);
+            if (ub is not null)
+            {
+                if ((bool)ub.HasInLibrary)
+                {
+                    <a asp-action="RemoveFromLibrary"
+                        asp-controller="Book"
+                        asp-route-ubId="@ub.Id"
+                        asp-route-bookId="@Model.Item2.Id"
+                        asp-route-userId="@Model.Item3.UserId">
+                        Удалить из библиотеки
+                     </a>
+                }
+                else
+                {
+                    <a asp-action="AddToLibrary"
+                        asp-controller="Book"
+                        asp-route-ubId="@ub.Id"
+                        asp-route-bookId="@Model.Item2.Id"
+                        asp-route-userId="@Model.Item3.UserId">
+                        Добавить в библиотеку
+                    </a>
+                }
+                if((int)ub.MarkValue == -1)
+                {
+                    <a asp-action="LikeBook"
+                       asp-controller="Book"
+                       asp-route-ubId="@ub.Id"
+                       asp-route-bookId="@Model.Item2.Id"
+                       asp-route-userId="@Model.Item3.UserId">
+                        🧡
+                    </a>
+                    <a asp-action="DislikeBook"
+                        asp-controller="Book"
+                       asp-route-ubId="@ub.Id"
+                       asp-route-bookId="@Model.Item2.Id"
+                       asp-route-userId="@Model.Item3.UserId">
+                        💔
+                    </a>
+                }
+                if ((int)ub.MarkValue == 0)
+                {
+                    <a asp-action="LikeBook"
+                       asp-route-ubId="@ub.Id"
+                       asp-route-bookId="@Model.Item2.Id"
+                       asp-route-userId="@Model.Item3.UserId">
+                        🧡
+                    </a>
+                    <a asp-action="CancelMarkBook"
+                        asp-controller="Book"
+                       asp-route-ubId="@ub.Id"
+                       asp-route-bookId="@Model.Item2.Id"
+                       asp-route-userId="@Model.Item3.UserId">
+                        Отменить оценку
+                    </a>
+                }
+                if ((int)ub.MarkValue == 1)
+                {
+                    <a asp-action="DislikeBook"
+                        asp-controller="Book"
+                       asp-route-ubId="@ub.Id"
+                       asp-route-bookId="@Model.Item2.Id"
+                       asp-route-userId="@Model.Item3.UserId">
+                        💔
+                    </a>             
+                    <a asp-action="CancelMarkBook"
+                        asp-controller="Book"
+                       asp-route-ubId="@ub.Id"
+                       asp-route-bookId="@Model.Item2.Id"
+                       asp-route-userId="@Model.Item3.UserId">
+                        Отменить оценку
+                    </a>
+                }
+            }
+            else
+            {
+                <a asp-action="AddToLibrary"
+                    asp-controller="Book"
+                   asp-route-bookId="@Model.Item2.Id"
+                   asp-route-userId="@Model.Item3.UserId">
+                    Добавить в библиотеку
+                </a>
+                <a asp-action="LikeBook"
+                    asp-controller="Book"
+                   asp-route-bookId="@Model.Item2.Id"
+                   asp-route-userId="@Model.Item3.UserId">
+                    🧡
+                </a>
+                <a asp-action="DislikeBook"
+                    asp-controller="Book"
+                   asp-route-bookId="@Model.Item2.Id"
+                   asp-route-userId="@Model.Item3.UserId">
+                    💔
+                </a>
+            }
+            
+        }
+    }
+    
+</div>

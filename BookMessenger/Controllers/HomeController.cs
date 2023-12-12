@@ -46,7 +46,13 @@ namespace BookMessenger.Controllers
             if (u == null && user != null && user.Login != null && user.Password != null)
             {
                 user.Role = TypeRole.User;
+                var profile = new UserProfile
+                {
+                    User = user,
+                };
+                user.UserProfile = profile;
                 db.Users.Add(user);
+                db.UserProfiles.Add(profile);
                 db.SaveChanges();
             }
             return RedirectToAction("Index");
@@ -59,7 +65,7 @@ namespace BookMessenger.Controllers
             if (u == null) return RedirectToAction("Index");
             var claims = new List<Claim>
             {
-                 new Claim(ClaimsIdentity.DefaultNameClaimType, u.Login),
+                new Claim(ClaimsIdentity.DefaultNameClaimType, u.Login),
                 new Claim(ClaimsIdentity.DefaultRoleClaimType, u.Role.ToString()),
                 new Claim(ClaimTypes.Surname, u.Id.ToString()),
              };
