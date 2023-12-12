@@ -1,0 +1,16 @@
+﻿@model Genre
+<div>
+    <form asp-action="EditGenre" asp-controller="Genre" asp-route-id="@Model.Id>
+        <p>
+            <label asp-for="Name">Название</label><br />
+            <input type="text" asp-for="Name" />
+        </p>
+        <p>
+            <label asp-for="Description">Описание</label><br />
+            <textarea asp-for="Description"></textarea>
+        </p>
+        <p>
+            <input type="submit" value="Изменить" />
+        </p>
+    </form>
+</div>

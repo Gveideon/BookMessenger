@@ -8,6 +8,7 @@ namespace BookMessenger.Controllers
     public class BookController : Controller
     {
         ApplicationContext db;
+        private Book createdBook;
         public BookController(ApplicationContext db)
         {
             this.db = db;
@@ -16,7 +17,9 @@ namespace BookMessenger.Controllers
         {
             db.Authors.Load();
             db.AuthorBooks.Load();
-            var books = db.Books.ToList();
+            db.Genres.Load();
+            ViewBag.Genres = db.Genres.ToList();
+            var books = db.Books.Include(b => b.Genres).ToList();
             var selectedBook = books.FirstOrDefault(b => b.Id == id);
             return View((books, selectedBook));
         }
@@ -41,7 +44,7 @@ namespace BookMessenger.Controllers
         }
         public IActionResult EditBook(int? id)
         {
-            ViewBag.Genres = db.Genres.Select(g => g.Name).ToList();
+            ViewBag.Genres = db.Genres.ToList();
             if (id != null)
             {
                 var b = db.Books.FirstOrDefault(b => b.Id == id);
@@ -51,10 +54,19 @@ namespace BookMessenger.Controllers
             return NotFound();
         }
         [HttpPost]
-        public IActionResult EditBook(Book book)
+        public IActionResult EditBook(Book book, List<string> genres)
         {
             if (book != null)
             {
+                var gl = db.Genres.ToList();
+                foreach (var genre in genres)
+                {
+                    var g = gl.FirstOrDefault(g => g.Name == genre);
+                    if(g is not  null)
+                    {
+                        book.Genres.Add(g);
+                    }
+                }
                 db.Books.Update(book);
                 db.SaveChanges();
                 return RedirectToAction("Index", new { });
@@ -64,8 +76,8 @@ namespace BookMessenger.Controllers
         }
         public IActionResult CreateBook()
         {
-            ViewBag.Genres = db.Genres.Select(g => g.Name).ToList();
-            return View();
+            ViewBag.Genres = db.Genres.ToList();
+            return View(ViewBag.createdBook);
         }
         [HttpPost]
         public IActionResult CreateBook(Book book)
@@ -133,6 +145,53 @@ namespace BookMessenger.Controllers
                         db.AuthorBooks.Remove(ab);
                         db.SaveChanges();
                     }
+                    return RedirectToAction("Index", new { });
+                }
+            }
+            return BadRequest();
+        }
+        public IActionResult AddGenreToBook(int? bookId)
+        {
+            if (bookId != null)
+            {
+                var b = db.Books.FirstOrDefault(b => b.Id == bookId);
+                return View(b);
+            }
+            return NotFound();
+        }
+        [HttpPost]
+        public IActionResult AddGenreToBook(string? name, int? id)
+        {
+            db.Books.Load();
+            db.Genres.Load();
+            var book = db.Books.Include( b => b.Genres).FirstOrDefault(b => b.Id == id);
+            var genre = db.Genres.Include(g => g.Books).FirstOrDefault(g => g.Name == name);
+            if (book != null &&
+                genre != null &&
+                book.Genres.FirstOrDefault( g => g.Id ==genre.Id) is null &&
+                genre.Books.FirstOrDefault(b => b.Id == book.Id)  is null)
+            {
+                
+                book.Genres.Add(genre);
+                genre.Books.Add(book);
+                db.SaveChanges();
+                return RedirectToAction("Index");
+            }
+            return NotFound();
+        }
+        [HttpPost]
+        public IActionResult DeleteGenreFromBook(int? bookId, int? genreId)
+        {
+            if (bookId != null && genreId != null)
+            {
+                var genre = db.Genres.Include(G => G.Books).FirstOrDefault(a => a.Id == genreId);
+                var book = db.Books.Include(b => b.Genres).FirstOrDefault(a => a.Id == bookId);
+                if (book != null && genre != null)
+                {
+                    genre.Books.Remove(book);
+                    book.Genres.Remove(genre);
+                    db.SaveChanges();
+                    
                     return RedirectToAction("Index", new { });
                 }
             }

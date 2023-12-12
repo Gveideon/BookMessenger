@@ -1,0 +1,20 @@
+﻿@model Book
+<script>
+    $(document).ready(function () {
+        $("#authorSearch").autocomplete({
+            source: "/api/query/searchGenre"
+        });
+    });
+</script>
+<div>
+    <form asp-action="AddGenreToBook" asp-controller="Book">
+        <p>
+            <label> Название</label><br />
+            <input name="name" type="text" id="authorSearch" placeholder="Input your keyword" />
+        </p>
+        <p>
+            <input name="id" hidden type="number" asp-for="@Model.Id" placeholder="Input your keyword" />
+        </p>
+        <input type="submit" value="добавить" />
+    </form>
+</div>

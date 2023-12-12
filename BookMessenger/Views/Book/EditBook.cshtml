@@ -5,7 +5,7 @@
 
 }
 <div>
-<form asp-action="EditBook" asp-controller="Book">
+    <form asp-action="EditBook" asp-controller="Book" asp-route-id="@Model.Id>
     <p>
         <label asp-for="Title">Название</label><br />
         <input type="text" asp-for="Title" />
@@ -14,10 +14,6 @@
         <label asp-for="Description">Описание</label><br />
         <textarea asp-for="Description"></textarea>
     </p>
-   <p>
-        <label asp-for="Genres">Жанры</label><br />
-        <select asp-for="Genres" asp-items="@new MultiSelectList( (List<string>)ViewBag.Genres)"></select>
-   </p>
    <p>
         <input type="submit" value="Изменить" />
     </p>

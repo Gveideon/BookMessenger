@@ -15,10 +15,6 @@
         <textarea asp-for="Description"></textarea>
     </p>
    <p>
-        <label asp-for="Genres">Жанры</label><br />
-        <select asp-for="Genres" asp-items="@new MultiSelectList( (List<string>)ViewBag.Genres)"></select>
-   </p>
-   <p>
         <input type="submit" value="Добавить" />
     </p>
 </form>

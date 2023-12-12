@@ -1,7 +1,31 @@
-﻿@model List<Genre>
-<div>
-    @foreach (var item in @Model)
-    {
-        
-    }
+﻿@model (List<Genre>,Genre)
+<div class="left_box">
+    <h2>Список жанров</h2>
+    <table class="table">
+        <tr><th>Название</th><th></th><th></th><th></th></tr>
+        @foreach (var item in Model.Item1)
+        {
+            <tr>
+                <td>@item.Name</td>
+                <td>
+                    <a asp-action="ShowGenreDescription" asp-controller="Genre" asp-route-id="@item.Id">Детали</a>
+                </td>
+                <td>
+                    <a asp-action="EditGenre" asp-controller="Genre" asp-route-id="@item.Id">Изменить</a>
+                </td>
+                <td>
+                    <form asp-controller="Genre" asp-action="DeleteGenre" method="post" asp-route-id="@item.Id">
+                        <input type="submit" value="Удалить" />
+                    </form>
+                </td>
+            </tr>
+
+        }
+    </table>
+    <a asp-action="CreateGenre" asp-controller="Genre">Добавить жанр</a>
+</div>
+<div class="right_box">
+    <p>Название: @Model.Item2?.Name</p><br />
+    <p>Описание: @Model.Item2?.Description</p><br />
+  
 </div>

@@ -42,5 +42,20 @@ namespace BookMessenger.Controllers
                 return BadRequest();
             }
         }
+        [Produces("application/json")]
+        [HttpGet("searchGenre")]
+        public async Task<IActionResult> SearchGenre()
+        {
+            try
+            {
+                string term = HttpContext.Request.Query["term"].ToString();
+                var names = db.Genres.Where(p => p.Name.Contains(term)).Select(p => p.Name).ToList();
+                return Ok(names);
+            }
+            catch
+            {
+                return BadRequest();
+            }
+        }
     }
 }
