@@ -1,6 +1,6 @@
 ﻿@model Author
 <div>
-    <form asp-action="EditAuthor" asp-controller="Author">
+    <form asp-action="EditAuthor" asp-controller="Author" asp-route-id="@Model.Id">
         <p>
             <label asp-for="Name">Имя</label><br />
             <input type="text" asp-for="Name" />
