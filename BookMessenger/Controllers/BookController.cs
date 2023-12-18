@@ -1,6 +1,9 @@
 ﻿using BookMessenger.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using System.Xml.Linq;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 using static System.Reflection.Metadata.BlobBuilder;
 
 namespace BookMessenger.Controllers
@@ -197,8 +200,11 @@ namespace BookMessenger.Controllers
             }
             return BadRequest();
         }
-        public IActionResult Catalog(int? bookId,int? userId)
+        public IActionResult Catalog(int? bookId,int? userId,
+                string? bookName, string? authorName, int page = 1,
+                SortBookState sortOrder = SortBookState.NameAsc)
         {
+            int pageSize = 5;
             Book? selectedBook = null;
             UserProfile? user = null;
             db.Books.Load();
@@ -243,9 +249,64 @@ namespace BookMessenger.Controllers
             {
                 HttpContext.Response.Cookies.Append("stateCatalog", "base");
             }
-                if (selectedBook is null)
-                selectedBook = books.FirstOrDefault();
-            return View((books, selectedBook, user));
+            if (!string.IsNullOrEmpty(bookName))
+            {
+                books = books.Where(p => p.Title!.ToLower().Contains(bookName.ToLower())).ToList();
+            }
+            if (!string.IsNullOrEmpty(authorName))
+            {
+                books = books.
+                    Where(p => p.
+                        AuthorBooks.
+                        Select(a => a.Author?.Name)
+                        .Where(n => n!.ToLower().Contains(authorName.ToLower()))
+                        .Count()> 0).
+                      ToList();
+            }
+            switch (sortOrder)
+            {
+                case SortBookState.NameDesc:
+                    books = books.OrderByDescending(s => s.Title).ToList();
+                    break;
+                case SortBookState.NameAsc:
+                    books = books.OrderBy(s => s.Title).ToList();
+                    break;
+                case SortBookState.LikeDesc:
+                    books = books.OrderByDescending(s => s.UserBooks.Where(a => a.MarkValue ==1).Count()).ToList();
+                    break;
+                case SortBookState.LikeAsc:
+                    books = books.OrderBy(s => s.UserBooks.Where(a => a.MarkValue == 1).Count()).ToList();
+                    break;
+                case SortBookState.DislikeDesc:
+                    books = books.OrderByDescending(s => s.UserBooks.Where(a => a.MarkValue == 0).Count()).ToList();
+                    break;
+                case SortBookState.DislikeAsc:
+                    books = books.OrderBy(s => s.UserBooks.Where(a => a.MarkValue == 0).Count()).ToList();
+                    break;
+                case SortBookState.AddingDesc:
+                    books = books.OrderByDescending(s => s.UserBooks.Where(a => (bool)a.HasInLibrary).Count()).ToList();
+                    break;
+                case SortBookState.AddingAsc:
+                    books = books.OrderBy(s => s.UserBooks.Where(a => (bool)a.HasInLibrary).Count()).ToList();
+                    break;
+                default:
+                    books = books.OrderByDescending(s => s.Title).ToList();
+                    break;
+            }
+
+            var count = books.Count();
+            var items = books.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+            if (selectedBook is null)
+            selectedBook = items.FirstOrDefault();
+            CatalogViewModel viewModel = new CatalogViewModel(
+            items,
+            selectedBook,
+            user,
+                new FilterBookViewModel(bookName, authorName),
+                new BookSortViewModel(sortOrder),
+                new CatalogPageViewModel(count, page, pageSize)
+            );
+            return View(viewModel);
         }
         public IActionResult ShowBookCatalogDescription(int? bookId, int? userId)
         {

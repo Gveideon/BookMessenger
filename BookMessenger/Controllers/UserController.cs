@@ -54,6 +54,10 @@ namespace BookMessenger.Controllers
             db.Users.Add(user);
             db.UserProfiles.Add(profile);
             db.SaveChanges();
+            if (User.FindFirst(ClaimTypes.Role)?.Value == TypeRole.Admin.ToString())
+            {
+                return RedirectToAction("Index", "Admin");
+            }
             return RedirectToAction("Index");
         }
         [HttpPost]
@@ -64,8 +68,15 @@ namespace BookMessenger.Controllers
                 var u = db.Users.FirstOrDefault(u => u.Id == id);
                 if (u != null)
                 {
+                    var profile = db.UserProfiles.FirstOrDefault(u => u.UserId == id); 
+                    if (profile != null)
+                        db.UserProfiles.Remove(profile);
                     db.Users.Remove(u);
                     await db.SaveChangesAsync();
+                    if (User.FindFirst(ClaimTypes.Role)?.Value == TypeRole.Admin.ToString())
+                    {
+                        return RedirectToAction("Index", "Admin");
+                    }
                     return RedirectToAction("Index");
                 }
             }

@@ -1,35 +1,116 @@
-﻿@model (List<Book>,Book,UserProfile)
+﻿@model CatalogViewModel
 
 <div class="left_box">
     <h2>Список книг</h2>
+    <form method="get">
+        <label>Название книги: </label>
+        <input name="bookName" value="@Model.FilterBookViewModel.SelectedBookName" />
+        <label>Автор: </label>
+        <input name="authorName" value="@Model.FilterBookViewModel.SelectedAuthorName" />
+        <input hidden name="userId" value="@Model.UserProfile.UserId" />
+        <input type="submit" value="Фильтр" />
+    </form>
     <table class="table">
-        <tr><th>Название</th><th></th></tr>
-        @foreach (var item in Model.Item1)
+        <tr>
+            <th>
+                <a asp-action="Catalog"
+                   asp-route-sortOrder="@(Model.SortViewModel.NameSort)"
+                   asp-route-bookName="@(Model.FilterBookViewModel.SelectedBookName)"
+                   asp-route-authorName="@(Model.FilterBookViewModel.SelectedAuthorName)"
+                   asp-route-userId="@Model.UserProfile.UserId">
+                    Название
+               </a>
+             </th>
+            <th>
+                <a asp-action="Catalog"
+                   asp-route-sortOrder="@(Model.SortViewModel.LikeNameSort)"
+                   asp-route-bookName="@(Model.FilterBookViewModel.SelectedBookName)"
+                   asp-route-authorName="@(Model.FilterBookViewModel.SelectedAuthorName)"
+                   asp-route-userId="@Model.UserProfile.UserId">
+                    Лайки
+                </a>
+            </th>
+            <th>
+                <a asp-action="Catalog"
+                   asp-route-sortOrder="@(Model.SortViewModel.DislikeNameSort)"
+                   asp-route-bookName="@(Model.FilterBookViewModel.SelectedBookName)"
+                   asp-route-authorName="@(Model.FilterBookViewModel.SelectedAuthorName)"
+                   asp-route-userId="@Model.UserProfile.UserId">
+                    Дизлайки
+                </a>
+            </th>
+            <th>
+                <a asp-action="Catalog"
+                   asp-route-sortOrder="@(Model.SortViewModel.AddingSortNameSort)"
+                   asp-route-bookName="@(Model.FilterBookViewModel.SelectedBookName)"
+                   asp-route-authorName="@(Model.FilterBookViewModel.SelectedAuthorName)"
+                   asp-route-userId="@Model.UserProfile.UserId">
+                    Добавления в библиотеку
+                </a>
+            </th>
+        </tr>
+        @foreach (var item in Model.Books)
         {
             <tr>
-                <td>@item.Title</td>
                 <td>
-                    <a asp-action="ShowBookCatalogDescription"
-                        asp-controller="Book"
-                        asp-route-bookId="@item.Id"
-                        asp-route-userId ="@Model.Item3.UserId">
-                        Детали
+                    <a asp-action="Catalog"
+                       asp-route-bookId="@item.Id"
+                       asp-route-userId="@Model.UserProfile.UserId"
+                       asp-route-sortOrder="@Model.SortViewModel.Current"
+                       asp-route-bookName="@Model.FilterBookViewModel.SelectedBookName"
+                       asp-route-authorName="@Model.FilterBookViewModel.SelectedAuthorName"
+                       asp-route-page="@Model.CatalogPageViewModel.PageNumber">
+                        @item.Title
                     </a>
+                </td>
+                <td>
+                    @item.UserBooks?.Select(ub => ub.MarkValue).Where(m => m == 1).Count() 🧡
+                </td>
+                <td>
+                    @item.UserBooks?.Select(ub => ub.MarkValue).Where(m => m == 0).Count() 💔
+                </td>
+                <td>
+                    @item.UserBooks?.Select(ub => ub.HasInLibrary).Where(m => (bool)m).Count() +
                 </td>
             </tr>
 
         }
     </table>
+    <p>
+        @if (Model.CatalogPageViewModel.HasPreviousPage)
+        {
+            <a asp-action="Catalog"
+               asp-route-page="@(Model.CatalogPageViewModel.PageNumber - 1)"
+               asp-route-sortOrder="@(Model.SortViewModel.Current)"
+               asp-route-bookName="@(Model.FilterBookViewModel.SelectedBookName)"
+               asp-route-authorName="@(Model.FilterBookViewModel.SelectedAuthorName)"
+               asp-route-userId="@Model.UserProfile.UserId"
+               >
+                Назад
+            </a>
+        }
+        @if (Model.CatalogPageViewModel.HasNextPage)
+        {
+            <a asp-action="Catalog"
+               asp-route-page="@(Model.CatalogPageViewModel.PageNumber + 1)"
+               asp-route-sortOrder="@(Model.SortViewModel.Current)"
+               asp-route-bookName="@(Model.FilterBookViewModel.SelectedBookName)"
+               asp-route-authorName="@(Model.FilterBookViewModel.SelectedAuthorName)"
+               asp-route-userId="@Model.UserProfile.UserId">
+                Вперед
+            </a>
+        }
+    </p>
 </div>
 <div class="right_box">
-    <p>Название: @Model.Item2?.Title</p><br/>
-    <p>Описание: @Model.Item2?.Description</p><br />
-    @if (Model.Item2 is not null) 
+    <p>Название: @Model.SelectedBook?.Title</p><br/>
+    <p>Описание: @Model.SelectedBook?.Description</p><br />
+    @if (Model.SelectedBook is not null) 
     {
         @: <p>Авторы:</p>
         <table>
         <tr><th>Имя</th><th>Номер</th></tr>
-            @foreach(var author in Model.Item2?.AuthorBooks.OrderBy(a => a.NumberOfAuthor))
+            @foreach(var author in Model.SelectedBook?.AuthorBooks.OrderBy(a => a.NumberOfAuthor))
               {
                 <tr>
                    <td> @author.Author?.Name</td>
@@ -41,19 +122,19 @@
         <p>Жанры:</p>
             <table>
                 <tr><th></th></tr>
-                @foreach (var genre in Model.Item2.Genres)
+                @foreach (var genre in Model.SelectedBook.Genres)
                 {
                     <tr>
                         <td> @genre.Name</td>
                     </tr>
                 }
         </table>
-        if (Model.Item3 is not null)
+        if (Model.UserProfile is not null)
         {
             var ub = Model.
-                Item2.
+                SelectedBook.
                 UserBooks.
-                FirstOrDefault(b => b.UserProfileId == Model.Item3.Id);
+                FirstOrDefault(b => b.UserProfileId == Model.UserProfile.Id);
             if (ub is not null)
             {
                 if ((bool)ub.HasInLibrary)
@@ -61,8 +142,8 @@
                     <a asp-action="RemoveFromLibrary"
                         asp-controller="Book"
                         asp-route-ubId="@ub.Id"
-                        asp-route-bookId="@Model.Item2.Id"
-                        asp-route-userId="@Model.Item3.UserId">
+                        asp-route-bookId="@Model.SelectedBook.Id"
+                        asp-route-userId="@Model.UserProfile.UserId">
                         Удалить из библиотеки
                      </a>
                 }
@@ -71,8 +152,8 @@
                     <a asp-action="AddToLibrary"
                         asp-controller="Book"
                         asp-route-ubId="@ub.Id"
-                        asp-route-bookId="@Model.Item2.Id"
-                        asp-route-userId="@Model.Item3.UserId">
+                        asp-route-bookId="@Model.SelectedBook.Id"
+                        asp-route-userId="@Model.UserProfile.UserId">
                         Добавить в библиотеку
                     </a>
                 }
@@ -81,15 +162,15 @@
                     <a asp-action="LikeBook"
                        asp-controller="Book"
                        asp-route-ubId="@ub.Id"
-                       asp-route-bookId="@Model.Item2.Id"
-                       asp-route-userId="@Model.Item3.UserId">
+                       asp-route-bookId="@Model.SelectedBook.Id"
+                       asp-route-userId="@Model.UserProfile.UserId">
                         🧡
                     </a>
                     <a asp-action="DislikeBook"
                         asp-controller="Book"
                        asp-route-ubId="@ub.Id"
-                       asp-route-bookId="@Model.Item2.Id"
-                       asp-route-userId="@Model.Item3.UserId">
+                       asp-route-bookId="@Model.SelectedBook.Id"
+                       asp-route-userId="@Model.UserProfile.UserId">
                         💔
                     </a>
                 }
@@ -97,15 +178,15 @@
                 {
                     <a asp-action="LikeBook"
                        asp-route-ubId="@ub.Id"
-                       asp-route-bookId="@Model.Item2.Id"
-                       asp-route-userId="@Model.Item3.UserId">
+                       asp-route-bookId="@Model.SelectedBook.Id"
+                       asp-route-userId="@Model.UserProfile.UserId">
                         🧡
                     </a>
                     <a asp-action="CancelMarkBook"
                         asp-controller="Book"
                        asp-route-ubId="@ub.Id"
-                       asp-route-bookId="@Model.Item2.Id"
-                       asp-route-userId="@Model.Item3.UserId">
+                       asp-route-bookId="@Model.SelectedBook.Id"
+                       asp-route-userId="@Model.UserProfile.UserId">
                         Отменить оценку
                     </a>
                 }
@@ -114,15 +195,15 @@
                     <a asp-action="DislikeBook"
                         asp-controller="Book"
                        asp-route-ubId="@ub.Id"
-                       asp-route-bookId="@Model.Item2.Id"
-                       asp-route-userId="@Model.Item3.UserId">
+                       asp-route-bookId="@Model.SelectedBook.Id"
+                       asp-route-userId="@Model.UserProfile.UserId">
                         💔
                     </a>             
                     <a asp-action="CancelMarkBook"
                         asp-controller="Book"
                        asp-route-ubId="@ub.Id"
-                       asp-route-bookId="@Model.Item2.Id"
-                       asp-route-userId="@Model.Item3.UserId">
+                       asp-route-bookId="@Model.SelectedBook.Id"
+                       asp-route-userId="@Model.UserProfile.UserId">
                         Отменить оценку
                     </a>
                 }
@@ -131,20 +212,20 @@
             {
                 <a asp-action="AddToLibrary"
                     asp-controller="Book"
-                   asp-route-bookId="@Model.Item2.Id"
-                   asp-route-userId="@Model.Item3.UserId">
+                   asp-route-bookId="@Model.SelectedBook.Id"
+                   asp-route-userId="@Model.UserProfile.UserId">
                     Добавить в библиотеку
                 </a>
                 <a asp-action="LikeBook"
                     asp-controller="Book"
-                   asp-route-bookId="@Model.Item2.Id"
-                   asp-route-userId="@Model.Item3.UserId">
+                   asp-route-bookId="@Model.SelectedBook.Id"
+                   asp-route-userId="@Model.UserProfile.UserId">
                     🧡
                 </a>
                 <a asp-action="DislikeBook"
                     asp-controller="Book"
-                   asp-route-bookId="@Model.Item2.Id"
-                   asp-route-userId="@Model.Item3.UserId">
+                   asp-route-bookId="@Model.SelectedBook.Id"
+                   asp-route-userId="@Model.UserProfile.UserId">
                     💔
                 </a>
             }
